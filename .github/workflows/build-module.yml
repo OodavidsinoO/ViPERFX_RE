@@ -1,0 +1,82 @@
+name: Build ViPER module
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Module version (e.g. v2.1.0). Empty = use module/module.prop'
+        required: false
+        type: string
+        default: ''
+      use_latest_dsp:
+        description: 'Pull the latest ViPERDSP upstream (origin/main) for this build. The repo itself stays untouched; the artifact name gets a -dsp-<sha> suffix.'
+        required: false
+        type: boolean
+        default: false
+      create_release:
+        description: 'Create a draft GitHub Release with the zip (permanent download link)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout (with ViPERDSP submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Sync latest ViPERDSP (optional)
+        if: inputs.use_latest_dsp
+        run: |
+          git -C ViPERDSP fetch origin
+          git -C ViPERDSP checkout --detach origin/main
+          echo "DSP_SHA=$(git -C ViPERDSP rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+      - name: Resolve version
+        id: ver
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="$(sed -n 's/^version=//p' module/module.prop)"
+          fi
+          VCODE="$(sed -n 's/^versionCode=//p' module/module.prop)"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$VCODE" >> "$GITHUB_ENV"
+
+      - name: Install zip
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq zip
+
+      - name: Build libs + package zip (make zip)
+        run: make zip VERSION_NAME="$VERSION" VERSION_CODE="$VERSION_CODE"
+
+      - name: Traceable artifact name
+        id: art
+        run: |
+          SUFFIX=""
+          if [ -n "$DSP_SHA" ]; then
+            SUFFIX="-dsp-${DSP_SHA}"
+            cp "out/ViPER4Android-RE-${VERSION}.zip" "out/ViPER4Android-RE-${VERSION}${SUFFIX}.zip"
+          fi
+          echo "ARTIFACT_NAME=ViPER4Android-RE-${VERSION}${SUFFIX}" >> "$GITHUB_ENV"
+          echo "ZIP_PATH=out/ViPER4Android-RE-${VERSION}${SUFFIX}.zip" >> "$GITHUB_ENV"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ZIP_PATH }}
+
+      - name: Create draft release (optional)
+        if: inputs.create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.ARTIFACT_NAME }}
+          name: ${{ env.ARTIFACT_NAME }}
+          draft: true
+          files: ${{ env.ZIP_PATH }}

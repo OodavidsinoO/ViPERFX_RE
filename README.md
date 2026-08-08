@@ -125,6 +125,28 @@ Dolby is implemented natively **without any app to disable** in Settings.
 
 ---
 
+### One-click builds with GitHub Actions
+
+`.github/workflows/build-module.yml` builds and packages the module on
+demand — no local toolchain needed:
+
+1. Go to **Actions → "Build ViPER module" → Run workflow**.
+2. Optional inputs:
+   - `version` — module version for the zip name; empty = read from
+     `module/module.prop` (`v2.1.0`).
+   - `use_latest_dsp` — pull the **latest upstream ViPERDSP** (`origin/main`)
+     for this build only. The repository itself is never modified; the
+     artifact gets a `-dsp-<sha>` suffix so the build stays traceable.
+     Default off (builds are reproducible against the pinned submodule).
+   - `create_release` — also create a **draft GitHub Release** with the zip
+     (permanent download link). The release tag includes the `-dsp-<sha>`
+     suffix when `use_latest_dsp` is on, so repeated runs never collide.
+3. Download the zip from the run's **Artifacts** section (or the Release).
+
+The workflow uses the runner's preinstalled Android NDK (27.3, same as the
+Makefile default), checks out the `ViPERDSP` submodule recursively, and runs
+the same `make zip` path as local builds.
+
 ## Building from source
 
 ### Prerequisites
