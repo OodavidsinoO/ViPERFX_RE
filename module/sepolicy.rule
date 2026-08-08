@@ -1,0 +1,5 @@
+# ViPER4Android-RE legacy driver: loaded by audioserver from vendor/odm soundfx
+allow audioserver vendor_file:dir { read search open };
+allow audioserver vendor_file:file { read open getattr execute execute_no_trans map };
+allow audioserver odm_file:dir { read search open };
+allow audioserver odm_file:file { read open getattr execute execute_no_trans map };

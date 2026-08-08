@@ -1,3 +1,15 @@
+# Unmount files this module bind-mounted on KernelSU without a metamodule
+MODDIR=${0%/*}
+if [ -f "$MODDIR/.mounted" ]; then
+  while IFS= read -r M; do
+    [ -n "$M" ] && umount -l "$M" 2>/dev/null
+  done < "$MODDIR/.mounted"
+fi
+# Fallback: unmount anything whose mount source points into this module
+for M in $(mount 2>/dev/null | grep "ViPER4Android-RE" | awk '{print $3}'); do
+  umount -l "$M" 2>/dev/null
+done
+
 # Don't modify anything after this
 if [ -f $INFO ]; then
   while read LINE; do

@@ -1,6 +1,6 @@
 id=ViPER4Android-RE
 name=ViPER4Android Reverse Engineered
-version=
-versionCode=
+version=v2.1.0
+versionCode=20260808
 author=pittvandewitt, MrWhite214, Zackptg5, Martmists, Iscle, llsl
-description=ViPER4Android Reverse Engineered is an audio enhancing software to provide everyone with a better audio experience
+description=ViPER4Android Reverse Engineered is an audio enhancing software to provide everyone with a better audio experience. Self-mounts on KernelSU (no metamodule required) and strips built-in Dolby/OPPO sound effects.

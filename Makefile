@@ -13,8 +13,8 @@ ALL_ABIS       := armeabi-v7a arm64-v8a
 BUILD_TYPE     := Release
 
 # Version defaults from module.prop (overridable via CLI)
-VERSION_NAME   ?= v2.0.1
-VERSION_CODE   ?= 20260726
+VERSION_NAME   ?= v2.1.0
+VERSION_CODE   ?= 20260808
 
 # ABI selection: pass ABI= to build a subset (comma or space separated)
 COMMA := ,
@@ -66,6 +66,8 @@ module: libs
 	@cp $(MODULE_DIR)/module.prop $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/customize.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/post-fs-data.sh $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/service.sh $(MODULE_OUT)/
+	@cp $(MODULE_DIR)/sepolicy.rule $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/uninstall.sh $(MODULE_OUT)/
 	@cp $(MODULE_DIR)/LICENSE $(MODULE_OUT)/
 	@cp -r $(MODULE_DIR)/common/* $(MODULE_OUT)/common/
